@@ -8830,6 +8830,191 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 !function(window) {
   'use strict';
 
-  window.Adventure = {};
+  window.Adventure = {
+    Framework: {}
+  };
 
 }(window);
+!function($, exports) {
+  'use strict';
+
+  /*
+   * Flush
+   * ---------------------------------------------------------------------------
+   */
+
+  function flush(location, body, options) {
+    var $el = $('.content'),
+        lFormatted = formatLocation(location),
+        bFormatted = formatBody(body),
+        oFormatted = formatOptions(options);
+
+    $el.html(render(lFormatted, bFormatted, oFormatted));
+  }
+
+
+  /*
+   * Format
+   * ---------------------------------------------------------------------------
+   */
+
+  function formatLocation(location) {
+    return location.name();
+  }
+
+  function formatBody(body) {
+    return body;
+  }
+
+  function formatOptions(options) {
+    return 'Hello';
+  }
+
+
+  /*
+   * Render
+   * ---------------------------------------------------------------------------
+   */
+
+  function render(lFormatted, bFormatted, oFormatted) {
+    var $l = container(),
+        $b = container(),
+        $o = container();
+
+    $l.text(lFormatted);
+    $b.text(bFormatted);
+    $o.text(oFormatted);
+  }
+
+  function container() { return $('<div>'); }
+
+
+  /*
+   * Export
+   * ---------------------------------------------------------------------------
+   */
+
+  exports.Output = { flush: flush };
+
+}($, Adventure.Framework);
+!function(exports) {
+  'use strict';
+
+  /*
+   * Constructor
+   * ---------------------------------------------------------------------------
+   */
+
+  function Location(name) {
+    this._name = name;
+    this._occupants = [];
+  }
+
+
+  /*
+   * Getters
+   * ---------------------------------------------------------------------------
+   */
+
+  Location.prototype.name = function() {
+    return this._name;
+  };
+
+  Location.prototype.occupants = function() {
+    return this._occupants.splice();
+  };
+
+
+  /*
+   * Occupancy
+   * ---------------------------------------------------------------------------
+   */
+
+  Location.prototype.enter = function(occupant) {
+    this._occupants.push(occupant);
+  };
+
+  Location.prototype.exit = function(occupant) {
+    var index = this._occupants.indexOf(occupant);
+    if(index < 0) return null;
+
+    this._occupants.splice(index, 1);
+    return occupant;
+  };
+
+
+  /*
+   * Exports
+   * ---------------------------------------------------------------------------
+   */
+
+  exports.Location = Location;
+
+}(Adventure.Framework);
+!function(exports) {
+  'use strict';
+
+  var flush = exports.Output.flush;
+
+  /*
+   * Constructor
+   * ---------------------------------------------------------------------------
+   */
+
+  function Scene(data) {
+    this._data = data;
+    this._location = null;
+  }
+
+
+  /*
+   * Turn Callbacks
+   * ---------------------------------------------------------------------------
+   */
+
+  Scene.prototype.start = function(player, next) {
+    flush(this._location, this._data.start, {});
+    next();
+  };
+
+  Scene.prototype.action = function(player, next) {
+  };
+
+  Scene.prototype.end = function(player, next) {
+    next();
+  };
+
+
+  /*
+   * Exports
+   * ---------------------------------------------------------------------------
+   */
+
+  exports.Scene = Scene;
+
+}(Adventure.Framework);
+!function(exports) {
+  'use strict';
+
+  /*
+   * Turn
+   * ---------------------------------------------------------------------------
+   */
+
+  function turn(player, scene, next) {
+    scene.start(player, function() {
+      scene.action(player, function() {
+        scene.end(player, next);
+      });
+    });
+  }
+
+
+  /*
+   * Export
+   * ---------------------------------------------------------------------------
+   */
+
+  exports.turn = turn;
+
+}(Adventure.Framework);

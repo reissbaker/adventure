@@ -23,6 +23,10 @@ build/js/adventure.js: bower_components/jquery/jquery.js
 	cat \
 		bower_components/jquery/jquery.js \
 		app/js/index.js \
+		app/js/framework/output.js \
+		app/js/framework/location.js \
+		app/js/framework/scene.js \
+		app/js/framework/turn.js \
 		> $@
 
 build/js/adventure.min.js: build/js/adventure.js node_modules/.bin/uglifyjs
