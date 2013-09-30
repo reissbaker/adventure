@@ -6,10 +6,10 @@
    * ---------------------------------------------------------------------------
    */
 
-  function turn(player, scene, next) {
-    scene.start(player, function() {
-      scene.action(player, function() {
-        scene.end(player, next);
+  function turn(player, location, scene, next) {
+    scene.start(player, location, function() {
+      scene.action(player, location, function() {
+        scene.end(player, location, next);
       });
     });
   }

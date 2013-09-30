@@ -10,7 +10,6 @@
 
   function Scene(data) {
     this._data = data;
-    this._location = null;
   }
 
 
@@ -19,15 +18,15 @@
    * ---------------------------------------------------------------------------
    */
 
-  Scene.prototype.start = function(player, next) {
-    flush(this._location, this._data.start, {});
+  Scene.prototype.start = function(player, location, next) {
+    flush(location, this._data.start, {});
     next();
   };
 
-  Scene.prototype.action = function(player, next) {
+  Scene.prototype.action = function(player, location, next) {
   };
 
-  Scene.prototype.end = function(player, next) {
+  Scene.prototype.end = function(player, location, next) {
     next();
   };
 
