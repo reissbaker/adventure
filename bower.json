@@ -1,0 +1,19 @@
+{
+  "name": "adventure",
+  "main": "index.html",
+  "ignore": [
+    ".gitignore",
+    ".git/",
+    "node_modules/",
+    "bower_components/",
+    ".DS_Store",
+    "*.swp",
+    "*.swo",
+    "*.swn",
+    "*~",
+    "test/build/"
+  ],
+  "dependencies": {
+    "jquery": "2.0.3"
+  }
+}

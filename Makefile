@@ -8,12 +8,20 @@ node_modules/.bin/bower:
 	npm install
 
 
+# Dependencies
+# ------------------------------------------------------------------------------
+
+bower_components/jquery/jquery.js: node_modules/.bin/bower
+	node_modules/.bin/bower install
+
+
 # Files
 # ------------------------------------------------------------------------------
 
-build/js/adventure.js:
+build/js/adventure.js: bower_components/jquery/jquery.js
 	mkdir -p build/js
 	cat \
+		bower_components/jquery/jquery.js \
 		app/js/index.js \
 		> $@
 
