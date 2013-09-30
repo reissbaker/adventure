@@ -63,7 +63,7 @@
 
   exports.Output = {
     flush: flush,
-    $el: function(option) { return $(id(option)); }
+    _$el: function(option) { return $(id(option)); }
   };
 
 }($, Adventure.Framework);

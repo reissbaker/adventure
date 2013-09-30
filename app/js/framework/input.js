@@ -24,13 +24,13 @@
       callback(option);
     };
 
-    Output.$el(option).on('click', handler);
+    Output._$el(option).on('click', handler);
     return handler;
   }
 
   function detachAll(handlers) {
     handlers.forEach(function(tuple) {
-      Output.$el(tuple.option).off('click', tuple.handler);
+      Output._$el(tuple.option).off('click', tuple.handler);
     });
   }
 
