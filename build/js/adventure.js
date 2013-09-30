@@ -8827,6 +8827,9 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 }
 
 })( window );
-!function() {
+!function(window) {
   'use strict';
-}();
+
+  window.Adventure = {};
+
+}(window);
