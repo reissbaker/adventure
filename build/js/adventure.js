@@ -8831,7 +8831,9 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
   'use strict';
 
   window.Adventure = {
-    Framework: {}
+    Framework: {},
+    Data: {},
+    Game: {}
   };
 
 }(window);
@@ -8870,6 +8872,10 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     return 'Hello';
   }
 
+  function id(option) {
+    return 'adventure-' + option.replace(/\s/g, '-');
+  }
+
 
   /*
    * Render
@@ -8894,9 +8900,51 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
    * ---------------------------------------------------------------------------
    */
 
-  exports.Output = { flush: flush };
+  exports.Output = {
+    flush: flush,
+    _$el: function(option) { return $(id(option)); }
+  };
 
 }($, Adventure.Framework);
+!function(document, $, exports) {
+  'use strict';
+
+  var Output = exports.Output;
+
+  function read(options, callback) {
+    var i, l, option, handler,
+        handlers = [],
+        clickback = function(choice) {
+          detachAll(handlers);
+          callback(choice);
+        };
+
+    for(i = 0, l = options.length; i < l; i++) {
+      option = options[i];
+      handler = attach(option, clickback);
+      handlers.push({ option: option, handler: handler });
+    }
+  };
+
+  function attach(option, callback) {
+    var handler = function(e) {
+      e.preventDefault();
+      callback(option);
+    };
+
+    Output._$el(option).on('click', handler);
+    return handler;
+  }
+
+  function detachAll(handlers) {
+    handlers.forEach(function(tuple) {
+      Output._$el(tuple.option).off('click', tuple.handler);
+    });
+  }
+
+  exports.Input = { read: read };
+
+}(document, $, Adventure.Framework);
 !function(exports) {
   'use strict';
 
@@ -8954,17 +9002,29 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 !function(exports) {
   'use strict';
 
-  var flush = exports.Output.flush;
-
   /*
    * Constructor
    * ---------------------------------------------------------------------------
    */
 
-  function Scene(data) {
-    this._data = data;
-    this._location = null;
+  function Scene(data, input, output) {
+    this._input = input;
+    this._output = output;
+
+    this._name = data.name;
+    this._text = data.text;
+    this._options = data.options;
+    this._end = data.end;
   }
+
+
+  /*
+   * Destructor
+   * ---------------------------------------------------------------------------
+   */
+
+  Scene.prototype.destroy = function() {
+  };
 
 
   /*
@@ -8972,16 +9032,16 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
    * ---------------------------------------------------------------------------
    */
 
-  Scene.prototype.start = function(player, next) {
-    flush(this._location, this._data.start, {});
-    next();
+  Scene.prototype.setup = function(player, location, done) {
+    this._output.flush(location, this._text, this._options);
+    done();
   };
 
-  Scene.prototype.action = function(player, next) {
-  };
-
-  Scene.prototype.end = function(player, next) {
-    next();
+  Scene.prototype.action = function(player, location, next, end) {
+    this._input.read(this._options, function(choice) {
+      if(!this._end) next(choice);
+      else end();
+    });
   };
 
 
@@ -8997,15 +9057,13 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
   'use strict';
 
   /*
-   * Turn
+   * Run Turn
    * ---------------------------------------------------------------------------
    */
 
-  function turn(player, scene, next) {
-    scene.start(player, function() {
-      scene.action(player, function() {
-        scene.end(player, next);
-      });
+  function run(player, location, scene, next, end) {
+    scene.setup(player, location, function() {
+      scene.action(player, location, next, end);
     });
   }
 
@@ -9015,6 +9073,90 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
    * ---------------------------------------------------------------------------
    */
 
-  exports.turn = turn;
+  exports.Turn = { run: run };
+
+}(Adventure.Framework);
+!function(exports) {
+  'use strict';
+
+  /*
+   * Dependencies
+   * ---------------------------------------------------------------------------
+   */
+
+  var Input = exports.Input,
+      Output = exports.Output,
+      Turn = exports.Turn;
+
+
+  /*
+   * State
+   * ---------------------------------------------------------------------------
+   */
+
+  var importantScenes = [],
+      locationScenes = [],
+      scenes = [];
+
+  var player = null,
+      scene = null,
+      location = null,
+      data = null;
+
+
+  /*
+   * Game Loop
+   * ---------------------------------------------------------------------------
+   */
+
+  function start(gameData) {
+    data = gameData;
+    importantScenes.push(gameData.start);
+  }
+
+  function run() {
+    scene = pickScene();
+    Turn.run(player, location, scene, next, end);
+  }
+
+  function next(choice) {
+    run();
+  }
+
+  function end() {
+    var remaining = importantScenes.concat(locationScenes).concat(scenes);
+    remaining.forEach(function(scene) { scene.destroy(); });
+  }
+
+
+  /*
+   * Helpers
+   * ---------------------------------------------------------------------------
+   */
+
+  function changeLocation(name) {
+    locationScenes = [];
+    location = data.location[name];
+  }
+
+  function pickScene() {
+    var index, queue,
+        order = [ importantScenes, locationScenes, scenes ],
+        s = null;
+
+    for(index = 0; !s && queue = order[index]; index++) {
+      s = queue.shift();
+    }
+
+    return s;
+  }
+
+
+  /*
+   * Exports
+   * ---------------------------------------------------------------------------
+   */
+
+  exports.Game = { start: start };
 
 }(Adventure.Framework);

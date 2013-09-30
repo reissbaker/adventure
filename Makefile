@@ -28,6 +28,7 @@ build/js/adventure.js: bower_components/jquery/jquery.js
 		app/js/framework/location.js \
 		app/js/framework/scene.js \
 		app/js/framework/turn.js \
+		app/js/framework/game.js \
 		> $@
 
 build/js/adventure.min.js: build/js/adventure.js node_modules/.bin/uglifyjs

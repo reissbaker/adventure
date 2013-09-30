@@ -11,7 +11,6 @@
     this._output = output;
 
     this._name = data.name;
-    this._trigger = data.trigger;
     this._text = data.text;
     this._options = data.options;
     this._end = data.end;
