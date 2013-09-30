@@ -33,6 +33,10 @@
     return 'Hello';
   }
 
+  function id(option) {
+    return 'adventure-' + option.replace(/\s/g, '-');
+  }
+
 
   /*
    * Render
@@ -57,6 +61,9 @@
    * ---------------------------------------------------------------------------
    */
 
-  exports.Output = { flush: flush };
+  exports.Output = {
+    flush: flush,
+    $el: function(option) { return $(id(option)); }
+  };
 
 }($, Adventure.Framework);
