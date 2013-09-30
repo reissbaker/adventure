@@ -1,22 +1,37 @@
+# Executables
+# ------------------------------------------------------------------------------
+
 node_modules/.bin/uglifyjs:
 	npm install
 
 node_modules/.bin/bower:
 	npm install
 
-build/adventure.js:
+
+# Files
+# ------------------------------------------------------------------------------
+
+build/js/adventure.js:
+	mkdir -p build/js
 	cat \
-		lib/index.js \
+		app/js/index.js \
 		> $@
 
-build/adventure.min.js: build/adventure.js node_modules/.bin/uglifyjs
+build/js/adventure.min.js: build/js/adventure.js node_modules/.bin/uglifyjs
 	./node_modules/.bin/uglifyjs \
 		-m \
 		-c warnings=false,unsafe=true \
 		$< > $@
 
-build/adventure.min.js.gz: build/adventure.min.js
-	gzip -c $< > $@
+build/css/adventure.css:
+	mkdir -p build/css
+	cat \
+		app/css/index.css \
+		> $@
+
+
+# Build Commands
+# ------------------------------------------------------------------------------
 
 .PHONY: clean
 clean:
@@ -24,7 +39,9 @@ clean:
 	mkdir build
 
 .PHONY: build
-build: build/adventure.js build/adventure.min.js build/adventure.min.js.gz
+build:  \
+	build/js/adventure.js build/js/adventure.min.js \
+	build/css/adventure.css
 
 .PHONY: rebuild
 rebuild: clean build
