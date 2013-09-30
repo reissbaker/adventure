@@ -20,6 +20,15 @@
 
 
   /*
+   * Destructor
+   * ---------------------------------------------------------------------------
+   */
+
+  Scene.prototype.destroy = function() {
+  };
+
+
+  /*
    * Turn Callbacks
    * ---------------------------------------------------------------------------
    */
@@ -36,8 +45,9 @@
     });
   };
 
-  Scene.prototype.end = function(player, location, next) {
-    next();
+  Scene.prototype.end = function(player, location, next, end) {
+    if(!this._end) next();
+    else end();
   };
 
 
