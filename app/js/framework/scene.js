@@ -6,10 +6,9 @@
    * ---------------------------------------------------------------------------
    */
 
-  function Scene(data, input, output, eventBus) {
+  function Scene(data, input, output) {
     this._input = input;
     this._output = output;
-    this._eventBus = eventBus;
 
     this._name = data.name;
     this._trigger = data.trigger;
@@ -33,21 +32,16 @@
    * ---------------------------------------------------------------------------
    */
 
-  Scene.prototype.start = function(player, location, next) {
+  Scene.prototype.setup = function(player, location, done) {
     this._output.flush(location, this._text, this._options);
-    next();
+    done();
   };
 
-  Scene.prototype.action = function(player, location, next) {
+  Scene.prototype.action = function(player, location, next, end) {
     this._input.read(this._options, function(choice) {
-      this._eventBus.emit(this._name + ':' + choice);
-      next();
+      if(!this._end) next(choice);
+      else end();
     });
-  };
-
-  Scene.prototype.end = function(player, location, next, end) {
-    if(!this._end) next();
-    else end();
   };
 
 

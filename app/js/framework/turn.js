@@ -2,15 +2,13 @@
   'use strict';
 
   /*
-   * Turn
+   * Run Turn
    * ---------------------------------------------------------------------------
    */
 
-  function turn(player, location, scene, next, end) {
-    scene.start(player, location, function() {
-      scene.action(player, location, function() {
-        scene.end(player, location, next, end);
-      });
+  function run(player, location, scene, next, end) {
+    scene.setup(player, location, function() {
+      scene.action(player, location, next, end);
     });
   }
 
@@ -20,6 +18,6 @@
    * ---------------------------------------------------------------------------
    */
 
-  exports.turn = turn;
+  exports.Turn = { run: run };
 
 }(Adventure.Framework);
