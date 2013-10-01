@@ -12,6 +12,8 @@
     this._text = data.text;
     this._options = data.options || {};
     this._end = !data.options;
+
+    this.attributes = data.attributes;
   }
 
 
@@ -44,7 +46,7 @@
     }
 
     io.input(Object.keys(this._options), function(choice) {
-      that._options[choice]();
+      that._options[choice].call(that);
       next(choice);
     });
   };

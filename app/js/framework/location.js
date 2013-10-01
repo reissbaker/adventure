@@ -50,11 +50,14 @@
    * ---------------------------------------------------------------------------
    */
 
-  var locations = [];
+  var locations = {};
   Location.define = function(name, neighbors) {
     var location = new Location(name, neighbors);
-    locations.push(location);
+    locations[name] = location;
     return location;
+  };
+  Location.get = function(name) {
+    return locations[name];
   };
 
 
