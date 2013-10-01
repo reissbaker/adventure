@@ -13,34 +13,30 @@
 
   function decrement() {
     score--;
-    next();
+    next(Location.get(this.attributes.location));
   }
 
   function noop() {
-    next();
+    next(Location.get(this.attributes.location));
   }
 
-  function next() {
+  function next(location) {
     index++;
-    update();
+    update(location);
   }
 
-  function restart() {
+  function restart(location) {
     index = 0;
-    update();
+    update(Location.get(this.attributes.location));
   }
 
-  function update() {
+  function update(location) {
     Game.Scenes.important.push(scenes[index]);
-    Game.Location.set(locations[index]);
+    Game.Location.set(location);
   }
 
   function scene(name, options) {
     scenes.push(Scene.define(name, options));
-  }
-
-  function location(name, neighbors) {
-    locations.push(Location.define(name, neighbors));
   }
 
   function template(name, data) {
@@ -58,50 +54,39 @@
   }
 
   scene('intro', {
-    text: function() {
-      return template('intro');
-    },
+    text: function() { return template('intro'); },
+    attributes: { location: 'SOMA' },
     options: {
       'drive east': noop
     }
   });
 
-  location('SOMA', {
-  });
-
   scene('arrival', {
-    text: function() {
-      return template('arrival');
-    },
+    text: function() { return template('arrival'); },
+    attributes: { location: '20 Rausch' },
     options: {
       'open car door': noop,
       'sit inside': decrement
     }
   });
 
-  location('20 Rausch', {
-    south: 'Folsom'
-  });
-
   scene('call', {
     text: function() { return template('call') },
+    attributes: { location: '20 Rausch' },
     options: {
       'call passenger': function() {
         score--;
         index += 2;
         called = true;
-        update();
+        update(Location.get(this.attributes.location));
       },
       'wait': noop
     }
   });
 
-  location('20 Rausch', {
-    south: 'Folsom'
-  });
-
   scene('call2', {
     text: function() { return template('call2') },
+    attributes: { location: '20 Rausch' },
     options: {
       'call passenger': function() {
         called = true;
@@ -109,25 +94,18 @@
       },
       'wait': function() {
         index += 2;
-        update();
+        update(Location.get(this.attributes.location));
       }
     }
   });
 
-  location('20 Rausch', {
-    south: 'Folsom'
-  });
-
   scene('phone', {
     text: function() { return template('phone'); },
+    attributes: { location: '20 Rausch' },
     options: {
       'wait': noop
     }
   })
-
-  location('20 Rausch', {
-    south: 'Folsom'
-  });
 
   scene('appearance', {
     text: function() {
@@ -135,58 +113,38 @@
         statement: called ? 'Sorry to keep you waiting' : 'Hey'
       });
     },
+    attributes: { location: 'Folsom' },
     options: {
       'drive south': noop
     }
   });
 
-  location('Folsom', {
-    north: '20 Rausch',
-    south: 'Harrison'
-  });
-
   scene('talking', {
-    text: function() {
-      return template('talking');
-    },
+    text: function() { return template('talking'); },
+    attributes: { location: 'Harrison' },
     options: {
       'meet his gaze': noop,
       'avoid his gaze': decrement
     }
   });
 
-  location('Harrison', {
-    north: 'Folsom',
-    south: 'Brannan'
-  });
-
   scene('destination', {
-    text: function() {
-      return template('destination');
-    },
+    text: function() { return template('destination'); },
+    attributes: { location: 'Brannan' },
     options: {
       'pull away from the curb': noop,
     }
   });
 
-  location('Harrison', {
-    north: 'Folsom',
-    south: 'Brannan'
-  });
-
   scene('end', {
-    text: function() {
-      return template('end', { score: score });
-    },
+    text: function() { return template('end', { score: score }); },
+    attributes: { location: 'SOMA' },
     options: {
       'replay ↩': restart
     }
   });
 
-  location('SOMA', {
-  });
-
-  update();
+  update(Location.get(scenes[0].attributes.location));
   Game.start();
 
 }(Adventure.Framework, Adventure.Game);
