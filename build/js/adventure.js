@@ -8932,7 +8932,6 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
           callback(choice);
         };
 
-    console.log(options);
     for(i = 0, l = options.length; i < l; i++) {
       option = options[i];
       handler = attach(option, clickback);
@@ -8947,7 +8946,6 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     };
 
     Output._$el(option).on('click', handler);
-    console.log(Output._$el(option));
     return handler;
   }
 
@@ -9167,7 +9165,6 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 
   function run() {
     scene = pickScene();
-    console.log(scene);
     Turn.run(io, player, location, scene, next, end);
   }
 
