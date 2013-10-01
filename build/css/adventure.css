@@ -1,0 +1,51 @@
+body {
+  background-color: black;
+}
+
+.content {
+  background-color: white;
+  width: 640px;
+  font-family: monospace;
+  height: 320px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -320px;
+  margin-top: -160px;
+}
+
+.adventure-game {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.adventure-content {
+  padding: 5px;
+}
+
+.adventure-location-container {
+  width: 100%;
+  overflow: auto;
+}
+.adventure-location {
+  position: relative;
+  float: right;
+  left: -10px;
+}
+
+.adventure-choices {
+  position: absolute;
+  bottom: 0px;
+}
+
+.adventure-choice {
+  margin-top: 20px;
+  margin-right: 9px;
+  background-color: gray;
+  color: white;
+  padding: 1px 2px;
+}
+
+.adventure-body {
+}

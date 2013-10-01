@@ -8861,15 +8861,31 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
    */
 
   function formatLocation(location) {
-    return location.name();
+    var $container = container().addClass('adventure-location-container'),
+        $el = container().text(location.name()).addClass('adventure-location');
+    return $container.append($el).addClass('adventure-content');
   }
 
   function formatBody(body) {
-    return body;
+    return container()
+    .text(body)
+    .addClass('adventure-body').addClass('adventure-content');
   }
 
   function formatOptions(options) {
-    return 'Hello';
+    var option, i, l,
+        $el = container().addClass('adventure-choices')
+              .addClass('adventure-content');
+    for(i = 0, l = options.length; i < l; i++) {
+      option = options[i];
+      $el.append(
+        link()
+        .text(option)
+        .attr('id', id(option))
+        .addClass('adventure-choice')
+      );
+    }
+    return $el;
   }
 
   function id(option) {
@@ -8883,16 +8899,13 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
    */
 
   function render(lFormatted, bFormatted, oFormatted) {
-    var $l = container(),
-        $b = container(),
-        $o = container();
-
-    $l.text(lFormatted);
-    $b.text(bFormatted);
-    $o.text(oFormatted);
+    return container()
+    .append(lFormatted, bFormatted, oFormatted)
+    .addClass('adventure-game');
   }
 
   function container() { return $('<div>'); }
+  function link() { return $('<a href=#>'); }
 
 
   /*
@@ -8902,7 +8915,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 
   exports.Output = {
     flush: flush,
-    _$el: function(option) { return $(id(option)); }
+    _$el: function(option) { return $('#' + id(option)); }
   };
 
 }($, Adventure.Framework);
@@ -8919,6 +8932,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
           callback(choice);
         };
 
+    console.log(options);
     for(i = 0, l = options.length; i < l; i++) {
       option = options[i];
       handler = attach(option, clickback);
@@ -8933,6 +8947,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     };
 
     Output._$el(option).on('click', handler);
+    console.log(Output._$el(option));
     return handler;
   }
 
@@ -8953,8 +8968,9 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
    * ---------------------------------------------------------------------------
    */
 
-  function Location(name) {
+  function Location(name, neighbors) {
     this._name = name;
+    this._neighbors = neighbors;
     this._occupants = [];
   }
 
@@ -8992,6 +9008,19 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 
 
   /*
+   * Class Methods
+   * ---------------------------------------------------------------------------
+   */
+
+  var locations = [];
+  Location.define = function(name, neighbors) {
+    var location = new Location(name, neighbors);
+    locations.push(location);
+    return location;
+  };
+
+
+  /*
    * Exports
    * ---------------------------------------------------------------------------
    */
@@ -9007,14 +9036,12 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
    * ---------------------------------------------------------------------------
    */
 
-  function Scene(data, input, output) {
-    this._input = input;
-    this._output = output;
+  function Scene(name, data) {
+    this._name = name;
 
-    this._name = data.name;
     this._text = data.text;
-    this._options = data.options;
-    this._end = data.end;
+    this._options = data.options || {};
+    this._end = !data.options;
   }
 
 
@@ -9032,16 +9059,37 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
    * ---------------------------------------------------------------------------
    */
 
-  Scene.prototype.setup = function(player, location, done) {
-    this._output.flush(location, this._text, this._options);
+  Scene.prototype.setup = function(io, player, location, done) {
+    var text = this._text();
+    io.output(location, text, Object.keys(this._options));
     done();
   };
 
-  Scene.prototype.action = function(player, location, next, end) {
-    this._input.read(this._options, function(choice) {
-      if(!this._end) next(choice);
-      else end();
+  Scene.prototype.action = function(io, player, location, next, end) {
+    var that = this;
+
+    if(this._end) {
+      end();
+      return;
+    }
+
+    io.input(Object.keys(this._options), function(choice) {
+      that._options[choice]();
+      next(choice);
     });
+  };
+
+
+  /*
+   * Class Methods
+   * ---------------------------------------------------------------------------
+   */
+
+  var scenes = [];
+  Scene.define = function(name, options) {
+    var scene = new Scene(name, options);
+    scenes.push(scene);
+    return scene;
   };
 
 
@@ -9061,9 +9109,9 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
    * ---------------------------------------------------------------------------
    */
 
-  function run(player, location, scene, next, end) {
-    scene.setup(player, location, function() {
-      scene.action(player, location, next, end);
+  function run(io, player, location, scene, next, end) {
+    scene.setup(io, player, location, function() {
+      scene.action(io, player, location, next, end);
     });
   }
 
@@ -9101,7 +9149,11 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
   var player = null,
       scene = null,
       location = null,
-      data = null;
+      data = null,
+      io = {
+        output: function(l, b, c) { Output.flush(l, b, c); },
+        input: function(c, callback) { Input.read(c, callback); }
+      };
 
 
   /*
@@ -9109,14 +9161,14 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
    * ---------------------------------------------------------------------------
    */
 
-  function start(gameData) {
-    data = gameData;
-    importantScenes.push(gameData.start);
+  function start() {
+    run();
   }
 
   function run() {
     scene = pickScene();
-    Turn.run(player, location, scene, next, end);
+    console.log(scene);
+    Turn.run(io, player, location, scene, next, end);
   }
 
   function next(choice) {
@@ -9144,7 +9196,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
         order = [ importantScenes, locationScenes, scenes ],
         s = null;
 
-    for(index = 0; !s && queue = order[index]; index++) {
+    for(index = 0; !s && (queue = order[index]); index++) {
       s = queue.shift();
     }
 
@@ -9157,6 +9209,209 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
    * ---------------------------------------------------------------------------
    */
 
-  exports.Game = { start: start };
+  exports.Game = {
+    start: start,
+    Scenes: {
+      important: importantScenes,
+      locationScenes: locationScenes,
+      basic: scenes
+    },
+    Location: {
+      set: function(l) { location = l; },
+      get: function() { return location; }
+    }
+  };
 
 }(Adventure.Framework);
+!function(Framework, exports) {
+  'use strict';
+
+  var Scene = Framework.Scene,
+      Location = Framework.Location,
+      Game = Framework.Game;
+
+  var score = 5,
+      index = 0,
+      called = false,
+      scenes = [],
+      locations = [];
+
+  function decrement() {
+    score--;
+    next();
+  }
+
+  function noop() {
+    next();
+  }
+
+  function next() {
+    index++;
+    update();
+  }
+
+  function restart() {
+    index = 0;
+    update();
+  }
+
+  function update() {
+    Game.Scenes.important.push(scenes[index]);
+    Game.Location.set(locations[index]);
+  }
+
+  function scene(name, options) {
+    scenes.push(Scene.define(name, options));
+  }
+
+  function location(name, neighbors) {
+    locations.push(Location.define(name, neighbors));
+  }
+
+  function template(name, data) {
+    var prop, regex,
+        text = $('#ab-' + name).text();
+    if(data) {
+      for(prop in data) {
+        if(data.hasOwnProperty(prop)) {
+          regex = '{{\\s*' + prop + '\\s*}}';
+          text = text.replace(new RegExp(regex), data[prop]);
+        }
+      }
+    }
+    return text;
+  }
+
+  scene('intro', {
+    text: function() {
+      return template('intro');
+    },
+    options: {
+      'drive east': noop
+    }
+  });
+
+  location('SOMA', {
+  });
+
+  scene('arrival', {
+    text: function() {
+      return template('arrival');
+    },
+    options: {
+      'open car door': noop,
+      'sit inside': decrement
+    }
+  });
+
+  location('20 Rausch', {
+    south: 'Folsom'
+  });
+
+  scene('call', {
+    text: function() { return template('call') },
+    options: {
+      'call passenger': function() {
+        score--;
+        index += 2;
+        called = true;
+        update();
+      },
+      'wait': noop
+    }
+  });
+
+  location('20 Rausch', {
+    south: 'Folsom'
+  });
+
+  scene('call2', {
+    text: function() { return template('call2') },
+    options: {
+      'call passenger': function() {
+        called = true;
+        decrement();
+      },
+      'wait': function() {
+        index += 2;
+        update();
+      }
+    }
+  });
+
+  location('20 Rausch', {
+    south: 'Folsom'
+  });
+
+  scene('phone', {
+    text: function() { return template('phone'); },
+    options: {
+      'wait': noop
+    }
+  })
+
+  location('20 Rausch', {
+    south: 'Folsom'
+  });
+
+  scene('appearance', {
+    text: function() {
+      return template('appearance', {
+        statement: called ? 'Sorry to keep you waiting' : 'Hey'
+      });
+    },
+    options: {
+      'drive south': noop
+    }
+  });
+
+  location('Folsom', {
+    north: '20 Rausch',
+    south: 'Harrison'
+  });
+
+  scene('talking', {
+    text: function() {
+      return template('talking');
+    },
+    options: {
+      'meet his gaze': noop,
+      'avoid his gaze': decrement
+    }
+  });
+
+  location('Harrison', {
+    north: 'Folsom',
+    south: 'Brannan'
+  });
+
+  scene('destination', {
+    text: function() {
+      return template('destination');
+    },
+    options: {
+      'pull away from the curb': noop,
+    }
+  });
+
+  location('Harrison', {
+    north: 'Folsom',
+    south: 'Brannan'
+  });
+
+  scene('end', {
+    text: function() {
+      return template('end', { score: score });
+    },
+    options: {
+      'replay ↩': restart
+    }
+  });
+
+  location('SOMA', {
+  });
+
+  update();
+  Game.start();
+
+}(Adventure.Framework, Adventure.Game);
