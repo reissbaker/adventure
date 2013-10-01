@@ -6,8 +6,9 @@
    * ---------------------------------------------------------------------------
    */
 
-  function Location(name) {
+  function Location(name, neighbors) {
     this._name = name;
+    this._neighbors = neighbors;
     this._occupants = [];
   }
 
@@ -41,6 +42,19 @@
 
     this._occupants.splice(index, 1);
     return occupant;
+  };
+
+
+  /*
+   * Class Methods
+   * ---------------------------------------------------------------------------
+   */
+
+  var locations = [];
+  Location.define = function(name, neighbors) {
+    var location = new Location(name, neighbors);
+    locations.push(location);
+    return location;
   };
 
 

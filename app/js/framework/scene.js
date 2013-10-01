@@ -6,14 +6,12 @@
    * ---------------------------------------------------------------------------
    */
 
-  function Scene(data, input, output) {
-    this._input = input;
-    this._output = output;
+  function Scene(name, data) {
+    this._name = name;
 
-    this._name = data.name;
     this._text = data.text;
-    this._options = data.options;
-    this._end = data.end;
+    this._options = data.options || {};
+    this._end = !data.options;
   }
 
 
@@ -31,16 +29,37 @@
    * ---------------------------------------------------------------------------
    */
 
-  Scene.prototype.setup = function(player, location, done) {
-    this._output.flush(location, this._text, this._options);
+  Scene.prototype.setup = function(io, player, location, done) {
+    var text = this._text();
+    io.output(location, text, Object.keys(this._options));
     done();
   };
 
-  Scene.prototype.action = function(player, location, next, end) {
-    this._input.read(this._options, function(choice) {
-      if(!this._end) next(choice);
-      else end();
+  Scene.prototype.action = function(io, player, location, next, end) {
+    var that = this;
+
+    if(this._end) {
+      end();
+      return;
+    }
+
+    io.input(Object.keys(this._options), function(choice) {
+      that._options[choice]();
+      next(choice);
     });
+  };
+
+
+  /*
+   * Class Methods
+   * ---------------------------------------------------------------------------
+   */
+
+  var scenes = [];
+  Scene.define = function(name, options) {
+    var scene = new Scene(name, options);
+    scenes.push(scene);
+    return scene;
   };
 
 

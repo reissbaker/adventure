@@ -23,7 +23,11 @@
   var player = null,
       scene = null,
       location = null,
-      data = null;
+      data = null,
+      io = {
+        output: function(l, b, c) { Output.flush(l, b, c); },
+        input: function(c, callback) { Input.read(c, callback); }
+      };
 
 
   /*
@@ -31,14 +35,14 @@
    * ---------------------------------------------------------------------------
    */
 
-  function start(gameData) {
-    data = gameData;
-    importantScenes.push(gameData.start);
+  function start() {
+    run();
   }
 
   function run() {
     scene = pickScene();
-    Turn.run(player, location, scene, next, end);
+    console.log(scene);
+    Turn.run(io, player, location, scene, next, end);
   }
 
   function next(choice) {
@@ -66,7 +70,7 @@
         order = [ importantScenes, locationScenes, scenes ],
         s = null;
 
-    for(index = 0; !s && queue = order[index]; index++) {
+    for(index = 0; !s && (queue = order[index]); index++) {
       s = queue.shift();
     }
 
@@ -79,6 +83,17 @@
    * ---------------------------------------------------------------------------
    */
 
-  exports.Game = { start: start };
+  exports.Game = {
+    start: start,
+    Scenes: {
+      important: importantScenes,
+      locationScenes: locationScenes,
+      basic: scenes
+    },
+    Location: {
+      set: function(l) { location = l; },
+      get: function() { return location; }
+    }
+  };
 
 }(Adventure.Framework);

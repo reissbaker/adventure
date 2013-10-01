@@ -22,15 +22,31 @@
    */
 
   function formatLocation(location) {
-    return location.name();
+    var $container = container().addClass('adventure-location-container'),
+        $el = container().text(location.name()).addClass('adventure-location');
+    return $container.append($el).addClass('adventure-content');
   }
 
   function formatBody(body) {
-    return body;
+    return container()
+    .text(body)
+    .addClass('adventure-body').addClass('adventure-content');
   }
 
   function formatOptions(options) {
-    return 'Hello';
+    var option, i, l,
+        $el = container().addClass('adventure-choices')
+              .addClass('adventure-content');
+    for(i = 0, l = options.length; i < l; i++) {
+      option = options[i];
+      $el.append(
+        link()
+        .text(option)
+        .attr('id', id(option))
+        .addClass('adventure-choice')
+      );
+    }
+    return $el;
   }
 
   function id(option) {
@@ -44,16 +60,13 @@
    */
 
   function render(lFormatted, bFormatted, oFormatted) {
-    var $l = container(),
-        $b = container(),
-        $o = container();
-
-    $l.text(lFormatted);
-    $b.text(bFormatted);
-    $o.text(oFormatted);
+    return container()
+    .append(lFormatted, bFormatted, oFormatted)
+    .addClass('adventure-game');
   }
 
   function container() { return $('<div>'); }
+  function link() { return $('<a href=#>'); }
 
 
   /*
@@ -63,7 +76,7 @@
 
   exports.Output = {
     flush: flush,
-    _$el: function(option) { return $(id(option)); }
+    _$el: function(option) { return $('#' + id(option)); }
   };
 
 }($, Adventure.Framework);

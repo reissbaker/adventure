@@ -6,9 +6,9 @@
    * ---------------------------------------------------------------------------
    */
 
-  function run(player, location, scene, next, end) {
-    scene.setup(player, location, function() {
-      scene.action(player, location, next, end);
+  function run(io, player, location, scene, next, end) {
+    scene.setup(io, player, location, function() {
+      scene.action(io, player, location, next, end);
     });
   }
 
