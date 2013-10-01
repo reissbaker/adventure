@@ -1,9 +1,10 @@
 # Adventure
 
-An adventure game.
+An adventure game. Play it at
+[reissbaker.github.io/adventure](http://reissbaker.github.io/adventure).
 
 
-# Getting Started
+# Hack On It
 
 First install [`node`](http://nodejs.org), which comes bundled with the `npm`
 executable. Then run:
