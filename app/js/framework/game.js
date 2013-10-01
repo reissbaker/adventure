@@ -41,7 +41,6 @@
 
   function run() {
     scene = pickScene();
-    console.log(scene);
     Turn.run(io, player, location, scene, next, end);
   }
 

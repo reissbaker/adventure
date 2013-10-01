@@ -11,7 +11,6 @@
           callback(choice);
         };
 
-    console.log(options);
     for(i = 0, l = options.length; i < l; i++) {
       option = options[i];
       handler = attach(option, clickback);
@@ -26,7 +25,6 @@
     };
 
     Output._$el(option).on('click', handler);
-    console.log(Output._$el(option));
     return handler;
   }
 
