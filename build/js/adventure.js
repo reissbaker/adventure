@@ -9272,6 +9272,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 
   function restart(location) {
     index = 0;
+    score = 5;
     update(Location.get(this.attributes.location));
   }
 
